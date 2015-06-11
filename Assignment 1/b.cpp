@@ -62,9 +62,9 @@ int main(){
 
   /// Draw for each channel
   for( int i = 0; i < histSize; i++ ){
-    line(redHistImage, Point(i, histH), Point(i, histH - redHash[i]*consR), Scalar(0, 0, 255), 2, 8, 0);
-    line(greenHistImage, Point( i, histH), Point(i, histH - greenHash[i]*consG), Scalar(0, 255, 0), 2, 8, 0);
-    line(blueHistImage, Point( i, histH), Point( i, histH - blueHash[i]*consB), Scalar(255, 0, 0), 2, 8, 0);
+    line(redHistImage, Point(i, histH), Point(i, histH - redHash[i]*consR), Scalar(0, 0, 255), 1, 8, 0);
+    line(greenHistImage, Point( i, histH), Point(i, histH - greenHash[i]*consG), Scalar(0, 255, 0), 1, 8, 0);
+    line(blueHistImage, Point( i, histH), Point( i, histH - blueHash[i]*consB), Scalar(255, 0, 0), 1, 8, 0);
   }
 
   displayImage(redHistImage, "Red Histogram");

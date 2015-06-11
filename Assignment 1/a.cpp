@@ -13,9 +13,9 @@
 using namespace cv;
 using namespace std;
 
-void displayImage(Mat image){
-  namedWindow( "Display window", WINDOW_AUTOSIZE );
-  imshow("Display window", image );
+void displayImage(Mat image, String windowName){
+  namedWindow( windowName, WINDOW_AUTOSIZE );
+  imshow(windowName, image );
 }
 
 Mat load_image(String imagePath){
@@ -39,7 +39,7 @@ Mat grayScale(Mat image){
 int main(){   
   Mat image = load_image("./lenna.png");
   Mat newImage = grayScale(image);
-  displayImage(newImage);
+  displayImage(newImage, "Lenna GrayScaled");
   waitKey(0);
   return 0;
 }
