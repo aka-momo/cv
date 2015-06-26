@@ -21,6 +21,9 @@ def gray_scale(img):
       grayImage[i,j] = np.mean(img[i,j])
   return grayImage
 
+def equalize(img):
+  return cv2.equalizeHist(img)
+
 def lbp(img):
   result = np.zeros(shape=(img.shape[0],img.shape[1]), dtype=np.uint8)
   for i in range(1, img.shape[0]-1):
@@ -42,6 +45,6 @@ def lbp(img):
   return result
 
 x = load_image("Original Image")
-display_image(lbp(gray_scale(x)), "Sample Image")
+display_image(equalize(gray_scale(x)), "Sample Image")
 cv2.waitKey(0)
 cv2.destroyAllWindows()
