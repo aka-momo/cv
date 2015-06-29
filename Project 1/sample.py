@@ -2,6 +2,9 @@ import cv2
 import cv2.cv as cv
 import sys
 import numpy as np
+import os
+from sklearn.naive_bayes import GaussianNB
+import pickle
 
 def load_image(img_src):
   print "Loading Image ..."
@@ -44,7 +47,71 @@ def lbp(img):
       result[i,j] = newValue
   return result
 
-x = load_image("Original Image")
-display_image(equalize(gray_scale(x)), "Sample Image")
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+def facedetect():
+  
+  BASE_PATH = './data/'
+  NEGATIVE_PATH = BASE_PATH + 'negative/'
+  POSITIVE_PATH = BASE_PATH + 'positive/'
+  TEST_PATH = BASE_PATH + 'test/'
+
+  # Initialize classifier
+  gnb = GaussianNB()
+  
+  # Prepare samples
+
+  print 'learning...'
+
+  i = 0
+
+  # samples = np.empty((32761, 1))
+
+  print 'negative'
+
+  # Negative
+  for fn in os.listdir(NEGATIVE_PATH):
+
+    if 'jpg' in fn or 'png' in fn:
+
+      im = cv2.imread(NEGATIVE_PATH + fn)
+      lbp_img = lbp(equalize(gray_scale(im)))
+      gnb.partial_fit(lbp_img.flatten(), [0], [0, 1])
+      print str(i)
+      i += 1
+
+
+  print 'positive'
+
+  # Positive
+  for fn in os.listdir(POSITIVE_PATH):
+
+    if 'jpg' in fn or 'png' in fn:
+
+      im = cv2.imread(POSITIVE_PATH + fn)
+      lbp_img = lbp(equalize(gray_scale(im)))
+      gnb.partial_fit(lbp_img.flatten(), [1])
+      print str(i)
+      i += 1
+
+
+  f = open('gnb', 'w')
+  pickle.dump(gnb.get_params(True), f)
+
+  print 'testing...'
+
+  for fn in os.listdir(TEST_PATH):
+
+    if 'jpg' in fn or 'png' in fn:  
+      
+      im = cv2.imread(TEST_PATH + fn)
+      lbp_img = lbp(equalize(gray_scale(im)))
+      c = gnb.predict(lbp_img.flatten())
+
+      print 'image: ' + fn + '\n'
+      print 'Class: ' + str(c)
+
+facedetect()
+
+# x = load_image("Original Image")
+# display_image(equalize(gray_scale(x)), "Sample Image")
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
