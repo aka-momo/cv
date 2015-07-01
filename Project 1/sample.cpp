@@ -13,9 +13,7 @@ using namespace std;
 #define POSITIVE_PATH BASE_PATH "positive/"
 #define NEGATIVE_PATH BASE_PATH "negative/"
 #define TEST_PATH BASE_PATH "test/"
-// #define VECTOR_SIZE 256 * 256
 
-Mat prepareVector(Mat& img, int targetSize);
 void hist(Mat& img, Mat& hist);
 void grayImage(Mat& img, Mat& gray_image);
 void lbp(Mat& img, Mat& lbp_img);
@@ -29,16 +27,6 @@ int main( int argc, char** argv )
     learn_face_detect();
     detect_face();
     return 0;
-}
-
-Mat prepareVector(Mat& img, int targetSize){
-
-    Mat padded = Mat::zeros(1, targetSize, img.type());
-
-    Mat vector = img.reshape(0, 1);
-    vector.copyTo(padded(Rect(0, 0, vector.cols, vector.rows)));
-
-    return padded;
 }
 
 void grayImage(Mat &img, Mat& gray_image){
