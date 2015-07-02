@@ -30,4 +30,9 @@
 
 *.jpg
 *.png
+<<<<<<< HEAD
 *.jpeg
+=======
+
+.DS_Store
+>>>>>>> fd2bfaf77b9e68a28c7542b1e459e10b88062ffb

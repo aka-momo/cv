@@ -9,13 +9,11 @@
 using namespace cv;
 using namespace std;
 
-#define BASE_PATH "/Users/mohammedamer/Python Workspace/cv/Project 1/data/"
+#define BASE_PATH "./data/"
 #define POSITIVE_PATH BASE_PATH "positive/"
 #define NEGATIVE_PATH BASE_PATH "negative/"
 #define TEST_PATH BASE_PATH "test/"
-// #define VECTOR_SIZE 256 * 256
 
-Mat prepareVector(Mat& img, int targetSize);
 void hist(Mat& img, Mat& hist);
 void grayImage(Mat& img, Mat& gray_image);
 void lbp(Mat& img, Mat& lbp_img);
@@ -29,16 +27,6 @@ int main( int argc, char** argv )
     learn_face_detect();
     detect_face();
     return 0;
-}
-
-Mat prepareVector(Mat& img, int targetSize){
-
-    Mat padded = Mat::zeros(1, targetSize, img.type());
-
-    Mat vector = img.reshape(0, 1);
-    vector.copyTo(padded(Rect(0, 0, vector.cols, vector.rows)));
-
-    return padded;
 }
 
 void grayImage(Mat &img, Mat& gray_image){
@@ -83,34 +71,6 @@ void hist(Mat& img, Mat& hist){
     tmp.copyTo(hist);
 
 }
-
-// void hist(Mat& img, Mat& hist){
-
-//     hist.create(1, 16 * 2, CV_32FC1);
-
-//     Mat tmp = Mat::zeros(1, 16 * 2, CV_32FC1);
-
-//     int nRows = img.rows;
-//     int nCols = img.cols;
-
-//     // Loop over pixels
-//     int i,j;
-//     for( i = 1; i < nRows - 1; i++){
-
-//         for ( j = 1; j < nCols - 1; j++){
-
-//             int pix = img.ptr<int>(i)[j];
-//             int val = (int)floor((pix / 255.0) * 15);
-
-//             tmp.ptr<float>(0)[val * 2] = val;
-//             tmp.ptr<float>(0)[(val * 2) + 1] += 1;
-
-//         }
-//     }
-
-//     tmp.copyTo(hist);
-
-// }
 
 void lbp(Mat& img, Mat& lbp_img){
 
@@ -219,7 +179,7 @@ void learn_face_detect(){
     printf("learning\n");
 
     CvNormalBayesClassifier bayesClassifier(samples, responses);
-    bayesClassifier.save("classifier");
+    bayesClassifier.save("new_classifier");
 
 }
 
@@ -228,7 +188,7 @@ void detect_face(){
     printf("detecting...\n");
 
     CvNormalBayesClassifier bayesClassifier;
-    bayesClassifier.load("classifier");
+    bayesClassifier.load("new_classifier");
 
     DIR *dir;
     struct dirent *ent;
@@ -254,14 +214,14 @@ void detect_face(){
             if(is_face){
 
                 if(clazz > 0)
-                    result = "true";
+                    result = "success";
                 else
                     result = "-----";
 
             }else{
 
                 if(clazz < 0)
-                    result = "true";
+                    result = "success";
                 else
                     result = "-----";
 
