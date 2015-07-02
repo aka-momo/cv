@@ -11,9 +11,31 @@
 using namespace cv;
 using namespace std;
 
-#define IMAGES_PATH "/Users/mohammedamer/Python Workspace/cv/Project 2/images/"
+#define IMAGES_PATH "./images/"
 
-Size size_aspect(Size src, Size target);
+void refineMatchesWithHomography(vector<KeyPoint>& queryKeypoints,
+    vector<KeyPoint>& trainKeypoints,
+    vector<DMatch>& matches, Mat& homography){
+
+        float reprojectionThreshold = 1.0;
+
+        // Prepare data for cv::findHomography
+            vector<Point2f> srcPoints(matches.size());
+            vector<Point2f> dstPoints(matches.size());
+
+        for (size_t i = 0; i < matches.size(); i++){
+                srcPoints[i] = trainKeypoints[matches[i].trainIdx].pt;
+                dstPoints[i] = queryKeypoints[matches[i].queryIdx].pt;
+            }
+        // Find homography matrix and get inliers mask
+            vector<unsigned char> inliersMask(srcPoints.size());
+            homography = findHomography(srcPoints,  dstPoints, CV_FM_RANSAC, reprojectionThreshold, inliersMask);
+            vector<DMatch> inliers;
+        for (size_t i=0; i<inliersMask.size(); i++)
+            if (inliersMask[i])
+                        inliers.push_back(matches[i]);
+        matches.swap(inliers);
+}
 
 int main(int argc, char const *argv[]){
 
@@ -33,7 +55,6 @@ int main(int argc, char const *argv[]){
 
             if(img.data){
 
-                // resize(img, img, size_aspect(img.size(), Size(256, 256)));
                 
                 vector<KeyPoint> key_points;
                 SiftFeatureDetector detector;
@@ -113,13 +134,8 @@ int main(int argc, char const *argv[]){
 
         }
 
-        cout << "Best match for: " << images_names[i] << " is: " << descriptors_images_names_vector[max_count_idx] << "\n-------------\n";
+        // cout << "Best match for: " << images_names[i] << " is: " << descriptors_images_names_vector[max_count_idx] << "\n-------------\n";
 
-        Mat object_img = imread(string(IMAGES_PATH) + images_names[i]);
-        Mat scene_img = imread(string(IMAGES_PATH) + descriptors_images_names_vector[max_count_idx]);
-        
-        // resize(object_img, object_img, size_aspect(object_img.size(), Size(256, 256)));
-        // resize(scene_img, scene_img, size_aspect(scene_img.size(), Size(256, 256)));
 
        
         // good matches
@@ -155,67 +171,19 @@ int main(int argc, char const *argv[]){
             }
         }
 
-        Mat img_matches;
-        drawMatches( object_img, query_key_points, scene_img, train_key_points_vectors[max_count_idx],
-               good_matches, img_matches, Scalar::all(-1), Scalar::all(-1),
-               vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
 
+        Mat homography;
+        refineMatchesWithHomography(query_key_points,train_key_points_vectors[max_count_idx],good_matches,homography);
 
-        //-- Localize the object
-        vector<Point2f> obj;
-        vector<Point2f> scene;
-
+         cout << "\n------------------------________-------------------------\n";
         for( int k = 0; k < good_matches.size(); k++ ){
-
-            DMatch good_match = good_matches[k];
             
-            obj.push_back( query_key_points[ good_match.queryIdx ].pt );
-            scene.push_back( train_key_points_vectors[ good_match.imgIdx ][good_match.trainIdx].pt );
+            cout << "Best match for: " << images_names[i] << " is: " << descriptors_images_names_vector[good_matches[k].imgIdx] << "\n-------------\n";
         }
 
-        Mat H = findHomography( obj, scene, CV_RANSAC);
-
-        //-- Get the corners from the image_1 ( the object to be "detected" )
-        vector<Point2f> obj_corners(4);
-        obj_corners[0] = cvPoint(0,0); obj_corners[1] = cvPoint( object_img.cols, 0 );
-        obj_corners[2] = cvPoint( object_img.cols, object_img.rows ); obj_corners[3] = cvPoint( 0, object_img.rows );
-        std::vector<Point2f> scene_corners(4);
-
-        perspectiveTransform( obj_corners, scene_corners, H);
-
-        //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-        line( img_matches, scene_corners[0] + Point2f( object_img.cols, 0), scene_corners[1] + Point2f( object_img.cols, 0), Scalar(0, 255, 0), 4 );
-        line( img_matches, scene_corners[1] + Point2f( object_img.cols, 0), scene_corners[2] + Point2f( object_img.cols, 0), Scalar( 0, 255, 0), 4 );
-        line( img_matches, scene_corners[2] + Point2f( object_img.cols, 0), scene_corners[3] + Point2f( object_img.cols, 0), Scalar( 0, 255, 0), 4 );
-        line( img_matches, scene_corners[3] + Point2f( object_img.cols, 0), scene_corners[0] + Point2f( object_img.cols, 0), Scalar( 0, 255, 0), 4 );
-
-        imshow( images_names[i].c_str(), img_matches );
-
-        waitKey(0);
     }
 
 
     return 0;
-}
-
-Size size_aspect(Size src, Size target){
-
-    Size new_size;
-
-    float ar = float(src.width) / float(src.height);
-
-    if(src.width >= src.height){
-
-        new_size.width = target.width;
-        new_size.height = (1 / ar) * new_size.width;
-
-    }else{
-
-        new_size.height = target.height;
-        new_size.width = ar * new_size.height;
-
-    }
-    
-    return new_size;
 }
 
